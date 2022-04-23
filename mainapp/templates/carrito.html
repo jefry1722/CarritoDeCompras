@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- CSS only -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+    <!--SweetAlert-->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <title>Carrito</title>
+  </head>
+  <body class="mt-2">
+    <div class="container">
+      <h1>Carrito de compras</h1>
+      <a href="/" style="text-decoration: none"
+        ><button type="submit" class="btn btn-info" style="color: white">
+          Volver a la página inicial
+        </button></a
+      >
+
+      {%if carrito%} {%for item in items%}
+      <div class="card m-2" style="width: 600px; border: solid black 1px">
+        <div
+          class="card-header"
+          style="background-color: rgb(3, 183, 183); display: flex"
+        >
+          <h3>{{item.producto.nombre}}</h3>
+          <a
+            href="eliminar_producto/{{item.id}}"
+            style="text-decoration: none; margin-left: auto; margin-right: 0"
+            ><button class="btn btn-danger" style="color: white">
+              Eliminar producto
+            </button></a
+          >
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <h5>Cantidad:</h5>
+            <div class="input-group mb-3">
+              <input
+                type="number"
+                id="cantidad"
+                name="{{item.id}}"
+                value="{{item.cantidad}}"
+                min="1"
+                onchange="validarInputNumber(event)"
+              />
+              <div class="input-group-prepend">
+                <button
+                  class="btn btn-success"
+                  style="border: solid black 2px; color: white"
+                  type="submit"
+                >
+                  Actualizar cantidad
+                </button>
+              </div>
+            </div>
+            {% csrf_token %}
+          </form>
+          <h5>Subtotal:&nbsp;<small>$</small>{{item.subtotal}}</h5>
+        </div>
+      </div>
+      {%endfor%} {%else%}
+      <h2 style="color: red">
+        No tienes un carrito creado, para crear uno añade productos
+      </h2>
+      {%endif%}
+      <br />
+      {%if carrito%}
+      <h2 style="display: flex">
+        Total:&nbsp;
+        <pre style="margin-top: 5px"><small>$</small>{{carrito.total}}</pre>
+      </h2>
+      <a href="pago/{{carrito.id}}" style="text-decoration: none"
+        ><button type="submit" class="btn btn-primary" style="color: white">
+          Realizar pago
+        </button></a
+      >
+      {%else%}
+      <h2 style="display: flex">
+        Total:&nbsp;
+        <pre style="margin-top: 5px"><small>$</small>0</pre>
+      </h2>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        style="color: white"
+        disabled
+      >
+        Realizar pago
+      </button>
+      {%endif%}
+    </div>
+    <script src="static/index.js"></script>
+  </body>
+</html>

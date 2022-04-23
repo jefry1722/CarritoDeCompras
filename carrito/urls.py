@@ -16,6 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from mainapp.views import inicio, registro, menuPrincipal, cerrarSesion, anadirAlCarro, carritoDelUsuario, \
+    eliminarProducto, pago
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login', inicio, name='inicio'),
+    path('registro', registro),
+    path('', menuPrincipal, name='menu_usuario'),
+    path('cerrar_sesion', cerrarSesion),
+    path('anadir_al_carro/<int:id>', anadirAlCarro),
+    path('carrito', carritoDelUsuario, name='carrito'),
+    path('eliminar_producto/<int:id>', eliminarProducto),
+    path('pago/<int:id>', pago),
 ]
