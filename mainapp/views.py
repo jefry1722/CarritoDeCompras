@@ -1,7 +1,15 @@
+import datetime
+import smtplib
+import time
 from django.shortcuts import render, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
-
-from mainapp.models import Usuario, Producto, Carrito, Item_carrito
+from mainapp.models import Usuario, Producto, Carrito, Item_carrito, Factura
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
 
 def inicio(request):
@@ -37,14 +45,15 @@ def registro(request):
 
 
 def menuPrincipal(request):
-    if request.method == 'POST':
-        categoria = request.POST.get("categoria")
-        productos = Producto.objects.filter(categoria__nombre__icontains=categoria)
-        return render(request, 'menu_principal.html', {'productos': productos})
-    productos = Producto.objects.order_by('categoria_id')
     isLoged = False
     if "usuario_id" in request.session:
         isLoged = True
+
+    if request.method == 'POST':
+        categoria = request.POST.get("categoria")
+        productos = Producto.objects.filter(categoria__nombre__icontains=categoria)
+        return render(request, 'menu_principal.html', {'productos': productos, 'is_loged': isLoged})
+    productos = Producto.objects.order_by('categoria_id')
     return render(request, 'menu_principal.html', {'productos': productos, 'is_loged': isLoged})
 
 
@@ -62,7 +71,7 @@ def anadirAlCarro(request, id):
     try:
         carrito = Carrito.objects.get(usuario_id=request.session["usuario_id"], estado="activo")
         carrito.save()
-        for item_carrito in Item_carrito.objects.filter(producto_id=id):
+        for item_carrito in Item_carrito.objects.filter(producto_id=id, carrito__estado="activo"):
             item_carrito.cantidad = item_carrito.cantidad + 1
             item_carrito.subtotal = item_carrito.producto.precio * item_carrito.cantidad
             item_carrito.save()
@@ -131,13 +140,73 @@ def pago(request, id):
     if "usuario_id" not in request.session:
         return redirect('inicio')
 
-    if request.method == 'POST':
-        direccion = request.POST.get("direccion")
-
     carrito = Carrito.objects.get(id=id)
     items_carrito = Item_carrito.objects.filter(carrito=carrito)
+    if request.method == 'POST':
+        direccion = request.POST.get("direccion")
+        carrito.direccion = direccion
+        carrito.estado = "completado"
+        carrito.save()
+        usuario = Usuario.objects.get(id=request.session["usuario_id"])
+        costo_envio = 0
+        if carrito.total < 100000:
+            costo_envio = 10000
+        factura = Factura(costo_envio=costo_envio, fecha_creacion=datetime.datetime.now(),
+                          fecha_llegada=(datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"),
+                          carrito=carrito)
+        factura.save()
+        enviarCorreo(carrito, items_carrito, usuario.correo, factura)
+        return redirect('menu_usuario')
+
     return render(request, 'pago.html', {'carrito': carrito, 'items': items_carrito})
 
 
-def enviarCorreo(request):
-    redirect('menu_usuario')
+def enviarCorreo(carrito, items, correo_destino, factura):
+    port = 587
+    email = "jefrynaicipa1@gmail.com"
+    codigo = "vtfiydwicqajouoz"
+    costo_total = carrito.total + factura.costo_envio + carrito.impuestos
+    costo_total = "{:,}".format(costo_total).replace(",", ".")
+    message = MIMEMultipart()
+    message["From"] = email
+    message["To"] = correo_destino
+    message["Subject"] = "Envio de factura"
+    message.attach(MIMEText("El costo total es: $" + costo_total + "\nEn la factura puedes revisar tus productos"))
+    generarPdf(message, factura, carrito, items)
+    server = smtplib.SMTP("smtp.gmail.com", port)
+    server.starttls()
+    server.login(email, codigo)
+    server.sendmail(email, [correo_destino], message.as_string())
+    server.quit()
+
+
+def generarPdf(message, factura, carrito, items):
+    costo_total = carrito.total + factura.costo_envio + carrito.impuestos
+    costo_total = "{:,}".format(costo_total).replace(",", ".")
+
+    c = canvas.Canvas("documento.pdf", pagesize=letter)
+    c.setFont("Times-Roman", 12)
+    c.setLineWidth(.3)
+    c.drawString(50, 700, 'FACTURA DE VENTA')
+    c.line(50, 750, 1050, 747)
+    c.drawString(50, 660, "El costo de los productos es: $" + "{:,}".format(carrito.total).replace(",", "."))
+    c.drawString(50, 640, "El costo de los impuestos es: $" + "{:,}".format(carrito.impuestos).replace(",", "."))
+    c.drawString(50, 620, "El costo del envio es: $" + "{:,}".format(factura.costo_envio).replace(",", "."))
+    c.drawString(50, 600, "El costo total es: $" + costo_total)
+    c.drawString(50, 560, "La fecha de llegada del pedido es: " + factura.fecha_llegada.__str__())
+    c.drawString(50, 540, "TUS PRODUCTOS")
+    y_position = 520
+    for item in items:
+        c.drawString(50, y_position, "Producto: " + item.producto.nombre.encode('ascii', 'ignore').decode(
+            'ascii') + " - Cantidad: " + str(item.cantidad) + " - Costo: $" + "{:,}".format(item.subtotal).replace(
+            ",", "."))
+        y_position -= 20
+    c.showPage()
+    c.save()
+    time.sleep(1)
+    archivo_adjunto = open("documento.pdf", 'rb')
+    adjunto_MIME = MIMEBase('application', 'octet-stream')
+    adjunto_MIME.set_payload((archivo_adjunto.read()))
+    encoders.encode_base64(adjunto_MIME)
+    adjunto_MIME.add_header('Content-Disposition', "attachment; filename= documento.pdf")
+    message.attach(adjunto_MIME)

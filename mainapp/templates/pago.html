@@ -57,20 +57,23 @@ Total:&nbsp;<small>$</small>{{carrito.total|add:carrito.impuestos}}</pre
       <h1>Realiza el pago</h1>
       <form method="POST">
         <div class="form-group">
-          <label for="email"><h4>Dirección:</h4></label>
+          <label for="direccion"><h4>Dirección:</h4></label>
           <input
-            type="email"
+            type="text"
             class="form-control"
-            id="email"
-            name="email"
-            aria-describedby="emailHelp"
+            id="direccion"
+            name="direccion"
             placeholder="Ingresa tu dirección"
           />
         </div>
         <br />
 
         <br />
-        <button type="submit" class="btn btn-primary">Realizar pago</button>
+        <a href="pago/{{carrito.id}}" style="text-decoration: none"
+          ><button type="submit" class="btn btn-primary" style="color: white">
+            Realizar pago
+          </button></a
+        >
         {% csrf_token %}
       </form>
     </div>
