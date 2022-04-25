@@ -10,10 +10,28 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
+
+import dj_database_url
+from django.conf.global_settings import DATABASES
+
 from pathlib import Path
+
+# Update database configuration with $DATABASE_URL.
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES = {}
+DATABASES['default'] = dj_database_url.config()
+DATABASES['default'].update(db_from_env)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -25,8 +43,6 @@ SECRET_KEY = 'django-insecure-c8ck6g@@%yujl505s_&b3_gokw=#42z1w=d)f6ek%bcjrq&kh5
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-STATICFILES_DIRS = ['mainapp/templates/static']
 
 # Application definition
 
@@ -42,6 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,16 +90,17 @@ WSGI_APPLICATION = 'carrito.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'carrito_de_compras',
-        'USER': 'root',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '3306',
+if len(DATABASES['default']) == 0:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'carrito_de_compras',
+            'USER': 'root',
+            'PASSWORD': 'admin',
+            'HOST': 'localhost',
+            'PORT': '3306',
+        }
     }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
