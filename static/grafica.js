@@ -23,6 +23,7 @@ facturas.sort((a, b) => {
   return 0;
 });
 
+/*Generar objeto completo de factura*/
 facturas.map((factura) => {
   const carrito = carritos.find((carrito) => factura.carrito_id == carrito.id);
   const itemsPorCarrito = items.filter((item) => item.carrito_id == carrito.id);
@@ -45,18 +46,50 @@ facturas.map((factura) => {
   return factura;
 });
 
-/*Data de ventas por mes*/
-const facturasDataVentasPorDia = facturas.map((factura) => {
-  return factura.fecha_creacion;
-});
-const ventasPorDia = facturasDataVentasPorDia.reduce((accumulator, value) => {
-  return { ...accumulator, [value]: (accumulator[value] || 0) + 1 };
+/*Data de ventas en total por dia*/
+const ventasTotalPorDia = facturas.reduce((accumulator, value) => {
+  return {
+    ...accumulator,
+    [value.fecha_creacion]: (accumulator[value.fecha_creacion] || 0) + 1,
+  };
 }, {});
 
 /*ChartJS */
 const ctx = document.getElementById("myChart").getContext("2d");
 const myChartVentas = new Chart(ctx, {
   type: "line",
+  data: {
+    labels: Object.keys(ventasTotalPorDia),
+    datasets: [
+      {
+        label: "Total por día",
+        data: Object.values(ventasTotalPorDia),
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+      },
+    ],
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  },
+});
+
+/*Data de ventas(Precio) por mes*/
+const ventasPorDia = facturas.reduce((accumulator, value) => {
+  return {
+    ...accumulator,
+    [value.fecha_creacion]:
+      (accumulator[value.fecha_creacion] || 0) + value.carrito.total,
+  };
+}, {});
+
+const ctx2 = document.getElementById("myChart2").getContext("2d");
+const myChartVentasDinero = new Chart(ctx2, {
+  type: "bar",
   data: {
     labels: Object.keys(ventasPorDia),
     datasets: [
@@ -77,26 +110,30 @@ const myChartVentas = new Chart(ctx, {
   },
 });
 
-/*Data de ventas(precio) en total por mes*/
-const facturasDataVentasDineroPorMes = facturas.map((factura) => {
-  return factura.fecha_creacion;
+/*Data de ventas(Precio) por producto*/
+const productosPorFactura = [];
+facturas.forEach((factura) => {
+  factura.carrito.items.forEach((item) => {
+    productosPorFactura.push(item);
+  });
 });
-const ventasDineroPorMes = facturasDataVentasDineroPorMes.reduce(
-  (accumulator, value) => {
-    return { ...accumulator, [value]: (accumulator[value] || 0) + 1 };
-  },
-  {}
-);
+const ventasPorProducto = productosPorFactura.reduce((accumulator, value) => {
+  return {
+    ...accumulator,
+    [value.producto.nombre]:
+      (accumulator[value.producto.nombre] || 0) + value.cantidad,
+  };
+}, {});
 
-const ctx2 = document.getElementById("myChart2").getContext("2d");
-const myChartVentasDinero = new Chart(ctx2, {
+const ctx3 = document.getElementById("myChart3").getContext("2d");
+const myChartVentasPorProducto = new Chart(ctx3, {
   type: "bar",
   data: {
-    labels: Object.keys(ventasPorDia),
+    labels: Object.keys(ventasPorProducto),
     datasets: [
       {
-        label: "Total por día",
-        data: Object.values(ventasPorDia),
+        label: "Ventas por producto",
+        data: Object.values(ventasPorProducto),
         borderColor: "rgba(255, 99, 132, 1)",
         borderWidth: 1,
       },
