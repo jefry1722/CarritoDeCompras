@@ -49,7 +49,7 @@ def loginAdministrador(request):
 def menuAdministrador(request):
     if "admin_id" not in request.session:
         return redirect('login_admin')
-    carritos = list(Carrito.objects.values('id', 'estado', 'total', 'impuestos', 'direccion', 'usuario_id'))
+    carritos = list(Carrito.objects.filter(estado="completado").values('id', 'estado', 'total', 'impuestos', 'direccion', 'usuario_id'))
     items = list(Item_carrito.objects.values('id', 'cantidad', 'subtotal', 'carrito_id', 'producto_id'))
     productos = list(Producto.objects.values('id', 'nombre', 'descripcion', 'precio', 'categoria_id'))
     categorias = list(Categoria.objects.values('id', 'nombre'))
