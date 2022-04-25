@@ -66,8 +66,65 @@ Total:&nbsp;<small>$</small>{{carrito.total|add:carrito.impuestos}}</pre
             placeholder="Ingresa tu dirección"
           />
         </div>
-        <br />
-
+        <div class="card">
+          <div class="card-header">
+            <h2>
+              Ingresa los datos de tu tarjeta de crédito
+              <i class="fa-brands fa-cc-visa" style="margin-left: 12px"></i>
+              <i
+                class="fa-brands fa-cc-mastercard"
+                style="margin-left: 12px"
+              ></i>
+              <i class="fa-brands fa-cc-amex" style="margin-left: 12px"></i>
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group col">
+                <label for="n_tarjeta">Número de la tarjeta</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="n_tarjeta"
+                  placeholder="0000-0000-0000-0000"
+                  required
+                />
+              </div>
+              <div class="form-group col">
+                <label for="n_titular">Nombre del titular</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="n_titular"
+                  placeholder="José Francisco Caldas"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fecha_vencimiento"
+                >Fecha de vencimiento (MM/AA)</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="fecha_vencimiento"
+                placeholder="12/26"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="codigo">Código de seguridad</label>
+              <input
+                type="text"
+                class="form-control"
+                id="codigo"
+                placeholder="123"
+                required
+              />
+            </div>
+          </div>
+        </div>
         <br />
         <a href="pago/{{carrito.id}}" style="text-decoration: none"
           ><button type="submit" class="btn btn-primary" style="color: white">

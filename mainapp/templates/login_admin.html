@@ -13,11 +13,11 @@
     />
     <!--SweetAlert-->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <title>Iniciar sesión</title>
+    <title>Iniciar sesión como Administrador</title>
   </head>
   <body class="mt-2">
     <div class="container">
-      <h1>Iniciar Sesión</h1>
+      <h1>Iniciar Sesión como Administrador</h1>
       <form method="POST">
         <div class="form-group">
           <label for="email">Email</label>
@@ -46,17 +46,6 @@
         {% csrf_token %}
       </form>
       <br />
-      <h2>¿No tienes una cuenta?, registrate</h2>
-      <a href="registro" style="text-decoration: none"
-        ><button type="submit" class="btn btn-danger" style="color: white">
-          Registro
-        </button></a
-      >
-      <a href="login_admin" style="text-decoration: none"
-        ><button type="submit" class="btn btn-success" style="color: white">
-          Login como administrador
-        </button></a
-      >
     </div>
 
     {%if error_password%}

@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 
 from mainapp.views import inicio, registro, menuPrincipal, cerrarSesion, anadirAlCarro, carritoDelUsuario, \
-    eliminarProducto, pago
+    eliminarProducto, pago, loginAdministrador, menuAdministrador
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +29,6 @@ urlpatterns = [
     path('carrito', carritoDelUsuario, name='carrito'),
     path('eliminar_producto/<int:id>', eliminarProducto),
     path('pago/<int:id>', pago),
+    path('login_admin', loginAdministrador, name='login_admin'),
+    path('menu_admin', menuAdministrador, name="menu_admin"),
 ]

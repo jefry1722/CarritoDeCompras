@@ -25,7 +25,7 @@ class Carrito(models.Model):
     estado = models.CharField(max_length=255)
     total = models.IntegerField(default=0)
     impuestos = models.IntegerField(default=0)
-    direccion = models.CharField(max_length=255,null=True)
+    direccion = models.CharField(max_length=255, null=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
 
 
@@ -41,3 +41,8 @@ class Factura(models.Model):
     costo_envio = models.IntegerField(default=0)
     fecha_creacion = models.DateTimeField()
     fecha_llegada = models.DateTimeField()
+
+
+class Administrador(models.Model):
+    correo = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)

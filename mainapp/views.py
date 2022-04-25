@@ -3,7 +3,7 @@ import smtplib
 import time
 from django.shortcuts import render, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
-from mainapp.models import Usuario, Producto, Carrito, Item_carrito, Factura
+from mainapp.models import Usuario, Producto, Carrito, Item_carrito, Factura, Administrador, Categoria
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
@@ -27,6 +27,41 @@ def inicio(request):
         except:
             return render(request, 'index.html', {'error_correo': True})
     return render(request, 'index.html')
+
+
+def loginAdministrador(request):
+    if request.method == 'POST':
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        try:
+            administrador = Administrador.objects.get(correo=email)
+
+            if administrador.password == password:
+                request.session["admin_id"] = str(administrador.id)
+                return redirect("menu_admin")
+            else:
+                return render(request, 'login_admin.html', {'error_password': True})
+        except:
+            return render(request, 'login_admin.html', {'error_correo': True})
+    return render(request, 'login_admin.html')
+
+
+def menuAdministrador(request):
+    if "admin_id" not in request.session:
+        return redirect('login_admin')
+    carritos = list(Carrito.objects.values('id', 'estado', 'total', 'impuestos', 'direccion', 'usuario_id'))
+    items = list(Item_carrito.objects.values('id', 'cantidad', 'subtotal', 'carrito_id', 'producto_id'))
+    productos = list(Producto.objects.values('id', 'nombre', 'descripcion', 'precio', 'categoria_id'))
+    categorias = list(Categoria.objects.values('id', 'nombre'))
+    facturas = list(Factura.objects.values('id', 'costo_envio', 'fecha_creacion', 'fecha_llegada', 'carrito_id'))
+    for factura in facturas:
+        factura["fecha_llegada"] = (factura["fecha_llegada"]).strftime(
+            "%Y-%m-%d").__str__()
+        factura["fecha_creacion"] = (factura["fecha_creacion"]).strftime(
+            "%Y-%m-%d").__str__()
+    return render(request, 'menu_admin.html',
+                  {'carritos': carritos, 'items': items, 'productos': productos, 'facturas': facturas,
+                   'categorias': categorias})
 
 
 def registro(request):
@@ -59,6 +94,8 @@ def menuPrincipal(request):
 
 def cerrarSesion(request):
     if request.session.has_key("usuario_id"):
+        request.session.flush()
+    if request.session.has_key("admin_id"):
         request.session.flush()
     return redirect('menu_usuario')
 
