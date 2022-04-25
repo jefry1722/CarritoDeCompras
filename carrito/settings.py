@@ -39,6 +39,8 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '6aj9il2xu2vqwvnitsg@!+4-8t3%zwr@$agm7x%o%yb2t9ivt%'
 
+CSRF_TRUSTED_ORIGINS = ["https://fast-cove-83966.herokuapp.com"]
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
