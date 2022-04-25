@@ -47,6 +47,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Application definition
+SITE_ID=1
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'mainapp',
 ]
 
@@ -143,6 +145,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#Heroku
+# Heroku
 import django_heroku
+
 django_heroku.settings(locals())

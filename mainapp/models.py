@@ -1,3 +1,4 @@
+from django.contrib.sites import admin
 from django.db import models
 
 
