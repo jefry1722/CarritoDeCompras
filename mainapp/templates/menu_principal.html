@@ -18,11 +18,16 @@
       <h1>Lista de productos</h1>
       {%if is_loged%}
       <a href="cerrar_sesion" style="text-decoration: none"
-        ><button type="submit" class="btn btn-warning">Cerrar sesión</button></a
+        ><button type="button" class="btn btn-warning">Cerrar sesión</button></a
       >
       {%else%}
       <a href="login" style="text-decoration: none"
-        ><button type="submit" class="btn btn-info">Iniciar sesión</button></a
+        ><button type="button" class="btn btn-info">Iniciar sesión</button></a
+      >
+      <a href="login_admin" style="text-decoration: none"
+        ><button type="button" class="btn btn-success" style="color: white">
+          Login como administrador
+        </button></a
       >
       {%endif%}
       <a href="carrito" style="text-decoration: none; color: white"
